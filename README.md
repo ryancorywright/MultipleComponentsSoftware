@@ -10,7 +10,7 @@ by Ryan Cory-Wright and Jean Pauphilet for which a preprint is available [here](
 
 The software in this package is designed to provide certifiably near-optimal solutions to the problem
 
-`max tr(U'QU`
+`max tr(U'QU)`
 `s.t. ||U||_0 <=k, U'U=I`
 
 using a relax-and-round, exact, or Lagrangean relaxation approach.
