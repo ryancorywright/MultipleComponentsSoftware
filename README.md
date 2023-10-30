@@ -54,7 +54,7 @@ Thank you for your interest in MultiplePCs. Please let us know if you encounter 
 
 
 Ryan Cory-Wright
-r.cory-wright@imperial.ac.uk
+r [dot] cory-wright [at] imperial [dot] ac [dot] uk
 
 Jean Pauphilet
-jpauphilet@london.edu
+jpauphilet [at] london [dot] edu
