@@ -18,7 +18,7 @@ using a relax-and-round, exact, or Lagrangian relaxation approach.
 
 ## Installation and set up
 
-To run this software, you must install a recent version of Julia from http://julialang.org/downloads/, and a recent version of the Mosek solver (academic licenses are freely available at https://www.mosek.com/products/academic-licenses/). To run parts of the code you will also need to install the Gurobi solver (academic licenses are freely available at https://www.gurobi.com/academia/academic-program-and-licenses/) If you do not have access to Mosek, you could use the freely available SCS package instead, although your results may vary.  The most recent version of Julia at the time this code was last tested was Julia 1.9.1 using Mosek version 10.1.11 and Gurobi version 10.0.0, although the code should run with any version of Julia from 1.7 onwards.
+To run this software, you must install a recent version of Julia from [here](http://julialang.org/downloads/), and a recent version of the Mosek solver (academic licenses are freely available [here](https://www.mosek.com/products/academic-licenses/)). To run parts of the code you will also need to install the Gurobi solver (academic licenses are freely available [here](https://www.gurobi.com/academia/academic-program-and-licenses/)). If you do not have access to Mosek, you could use another semidefinite solver, although your results may vary.  The most recent version of Julia at the time this code was last tested was Julia 1.9.1 using Mosek version 10.1.11 and Gurobi version 10.0.0, the code has previously successfully run using Julia version 1.7. 
 
 Several packages must be installed in Julia before the code can be run.  These packages can be found in "core_julia1p7.jl"
 
