@@ -40,12 +40,14 @@ If you are interested in computing a single sparse PC, you may want to check out
 
 If you use MultiplePCs.jl, we ask that you please consider citing the following preprint https://optimization-online.org/2022/09/sparse-pca-with-multiple-components/
 BibTeX:
+```
 @article{cory2022sparse,
   title={Sparse PCA With Multiple Components},
   author={Cory-Wright, Ryan and Pauphilet, Jean},
   journal={arXiv preprint arXiv:2209.14790},
   year={2022}
 }
+```
 
 ## Thank you
 
