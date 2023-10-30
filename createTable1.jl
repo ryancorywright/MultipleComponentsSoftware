@@ -26,14 +26,16 @@ n=size(pitprops,1)
 B=sqrt(pitprops);
 
 r=2
-for k in 4:2:10 #4:2:10
+for k in 4:2:10 
     results_run=similar(results_template, 0)
 
 
 
-    run_extended=@elapsed UB_extended, = getSDPUpperBound_gd_multiple_extended(pitprops, k, r, true, true, false, false, repeat([k], r))
+    run_extended=@elapsed UB_extended, = getSDPUpperBound_gd_multiple_extended(pitprops, r, repeat([k], r), useSOCs=true, usePSDs=true, generateDisjointFeasible=true, useCuts=false, verbose=false, k_tot=k)
 
-    run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(pitprops, k, r, repeat([k], r), 3600.0, 1e-6, true)
+
+    
+    run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(pitprops, k, r, targetSparsity=repeat([k], r), timeLimit=7200.0, theGap=1e-4, use_ell1=true, warmStart=zeros(n,r))
 
 
         push!(results_run, [n, r, k, [-1],
@@ -55,11 +57,11 @@ for k_split in [[1,3], [2,2], [1,5], [2,4], [3,3], [1,7], [2,6], [3,5], [4,4], [
 
 
 
-    run_extended=@elapsed UB_extended, = getSDPUpperBound_gd_multiple_extended(pitprops, sum(k_split), r, true, true, false, false, k_split)
+    run_extended=@elapsed UB_extended, = getSDPUpperBound_gd_multiple_extended(pitprops, r, k_split, useSOCs=true, usePSDs=true, generateDisjointFeasible=true, useCuts=false, verbose=false, k_tot=sum(k_split))
 
-    run_perm=@elapsed UB_perm, = getSDPUpperBound_gd_multiple_permutation(pitprops, r, k_split, true, false, false)
+    run_perm=@elapsed UB_perm, = getSDPUpperBound_gd_multiple_permutation(pitprops, r, k_split, usePSDs=true, useSOCs=false, useCuts=false)
 
-    run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(pitprops, sum(k_split), r, k_split, 3600.0, 1e-6, true)
+    run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(pitprops, sum(k_split), r, targetSparsity=k_split, timeLimit=7200.0, theGap=1e-4, use_ell1=true, warmStart=zeros(n,r))
 
 
 
@@ -78,14 +80,14 @@ end
 
 
 r=3
-for k in 6:3:9 #4:2:10
+for k in 6:3:9 
     results_run=similar(results_template, 0)
 
 
 
-    run_extended=@elapsed UB_extended, = getSDPUpperBound_gd_multiple_extended(pitprops, k, r, true, true, false, false, repeat([k], r))
+    run_extended=@elapsed UB_extended, = getSDPUpperBound_gd_multiple_extended(pitprops, r, repeat([k], r), useSOCs=true, usePSDs=true, generateDisjointFeasible=true, useCuts=false, verbose=false, k_tot=k)
 
-    run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(pitprops, k, r, repeat([k], r), 3600.0, 1e-6, true)
+    run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(pitprops, k, r, targetSparsity=repeat([k], r), timeLimit=7200.0, theGap=1e-4, use_ell1=true, warmStart=zeros(n,r))
 
 
         push!(results_run, [n, r, k, [-1],
@@ -103,19 +105,16 @@ end
 
 r=3
 for k_split in [[1,1,4], [1,2,3], [2,2,2], [1,1,7], [1,2,6], [1,3,5], [1,4,4], [2,2,5], [2,3,4], [3,3,3]]
-    # [1,1,10], [1,2, 9], [1,3,8], [1,4,7], [1,5,6], [2,2,8], [2,3,7], [2,4,6], [2,5,5], [3,3,6], [3,4,5],
-    #            [4,4,4]] #
-    # Note: can put in the commented out entries to see the results for r=3, k_overall=12; but don't trust Gurobi at this scale!
 
     results_run=similar(results_template, 0)
 
 
 
-    run_extended=@elapsed UB_extended, = getSDPUpperBound_gd_multiple_extended(pitprops, sum(k_split), r, true, true, false, false, k_split)
+    run_extended=@elapsed UB_extended, = getSDPUpperBound_gd_multiple_extended(pitprops, r, k_split, useSOCs=true, usePSDs=true, generateDisjointFeasible=true, useCuts=false, verbose=false, k_tot=sum(k_split))
 
-    run_perm=@elapsed UB_perm, = getSDPUpperBound_gd_multiple_permutation(pitprops, r, k_split, true, false, false)
+    run_perm=@elapsed UB_perm, = getSDPUpperBound_gd_multiple_permutation(pitprops, r, k_split, usePSDs=true, useSOCs=false, useCuts=false)
 
-    run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(pitprops, sum(k_split), r, k_split, 3600.0, 1e-6, true)
+    run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(pitprops, sum(k_split), r, targetSparsity=k_split, timeLimit=7200.0, theGap=1e-4, use_ell1=true, warmStart=zeros(n,r))
 
 
         push!(results_run, [n, r, sum(k_split), k_split,
