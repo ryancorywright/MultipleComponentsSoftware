@@ -4,7 +4,7 @@ Software supplement for the paper
 
 "Sparse PCA with Multiple Principal Components"
 
-by Ryan Cory-Wright and Jean Pauphilet for which a preprint is available at https://optimization-online.org/2022/09/sparse-pca-with-multiple-components/
+by Ryan Cory-Wright and Jean Pauphilet for which a preprint is available [here](https://optimization-online.org/2022/09/sparse-pca-with-multiple-components/)
 
 ## Introduction
 
@@ -38,8 +38,7 @@ If you are interested in computing a single sparse PC, you may want to check out
 
 ## Citing MultiplePCs.jl
 
-If you use MultiplePCs.jl, we ask that you please consider citing the following [preprint](https://optimization-online.org/2022/09/sparse-pca-with-multiple-components/)
-BibTeX:
+If you use MultiplePCs.jl, we ask that you please consider citing the following [preprint](https://optimization-online.org/2022/09/sparse-pca-with-multiple-components/):
 ```
 @article{cory2022sparse,
   title={Sparse PCA With Multiple Components},
