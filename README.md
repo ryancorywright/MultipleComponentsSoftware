@@ -22,17 +22,14 @@ To run this software, you must install a recent version of Julia from [here](htt
 
 Several packages must be installed in Julia before the code can be run.  These packages can be found in "core_julia1p7.jl"
 
-At this point, the "createTablex.jl" and "createFigurex.jl" files should run successfully.  To run the script, navigate to the folder directory and run:
-
-`include("createTablex.jl")`
-
- The script will reproduce table x in the paper, where x is an integer between 1 and 4.
-
-
- Note that the createFigure2.jl script also runs some code originally written by Berk and Bertsimas for benchmarking purposes; to fully replicate our results however, you will also need to install the elasticnet R package and download Matlab to run the code released by Hein and Buhler.
 
 ## Correspondence between script files and figures/tables in the paper
+- - The file "createTable1.jl" produces the output used to generate Table 1 in our manuscript. 
+- The files "createTable2_x.jl" produce the output used to generate Table 2, and Tables EC.6-EC.15 in our manuscript (where the "x" denotes the method run—note that you will need to run some of the methods from the literature we benchmarked against yourself; we provide the code for our methods and those from the literature implemented in Julia in this repo).
 - The file "createFigure3.jl" produces the output used to generate Figure 3, Table 3, and Figure EC.1 in our manuscript. 
+- The file "createTableec2.jl" produces the output used to generate Table EC.2 in our manuscript. 
+- The file "createTableec3_to_ec5.jl" produces the output used to generate Tables EC.3-EC.5 in our manuscript. 
+
 
 Note that you may need more RAM than is available on a standard laptop to reproduce the output for some of the largest datasets considered in the paper.
 
