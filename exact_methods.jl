@@ -17,7 +17,7 @@ function solveExact_direct(Sigma::Array{Float64, 2}, k::Int64, r::Int64; targetS
     set_optimizer_attribute(exact_model, "MIPGap", theGap)
     set_optimizer_attribute(exact_model, "FuncPieceError", 1e-6)
     set_optimizer_attribute(exact_model, "FuncPieceLength", 1e-5)
-    set_optimizer_attribute(exact_model, "MemLimit", 300) # Don't use >300 GB RAM; can change this parameter depending on machine spwecs
+    set_optimizer_attribute(exact_model, "MemLimit", 300) # Don't use >300 GB RAM; can change this parameter depending on machine specs
 
 
     # Orthogonality
@@ -145,13 +145,12 @@ function solveExact_direct(Sigma::Array{Float64, 2}, k::Int64, r::Int64; targetS
     end
 
 
-    #Impose l_1 target sparsity, not implementing SOC formulation for sake of tractability
     if use_ell1
         @variable(exact_model, U_abs[1:n, 1:r])
         @constraint(exact_model, U.<=U_abs)
         @constraint(exact_model, -U.<=U_abs)
         @constraint(exact_model, imposePCTarget2[t=1:r], sum(U_abs[:,t])<=sqrt(targetSparsity[t]))
-        # @constraint(exact_model, imposePCTargetSOC[t=1:r], [sum(z[:,t])+1.0; sum(z[:,t])-1.0; 2.0*sum(U_abs[:,t])] in SecondOrderCone())
+        @constraint(exact_model, imposePCTargetSOC[t=1:r], [sum(z[:,t])+1.0; sum(z[:,t])-1.0; 2.0*sum(U_abs[:,t])] in SecondOrderCone())
 
     end
 
