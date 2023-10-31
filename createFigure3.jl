@@ -13,7 +13,7 @@ k_tot=30
 
 # Note: you will need to enumerate over the args between 1 and 74 for k_tot=30 and 1 and 18 for k_tot=15, and run both k_tot=15 and k_tot=30 to fully reproduce our results
 
-for ARG in ["1"]
+for ARG in ARGS
 
 
 

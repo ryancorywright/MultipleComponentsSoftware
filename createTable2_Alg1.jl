@@ -1,14 +1,20 @@
 include("core_julia1p7.jl")
 include("sdp_bounds.jl")
-include("iterative_deflation.jl")
+include("iterative_deflation3.jl")
 include("exact_methods.jl")
+
+include("covariance_thresholding.jl")
+include("custombb/branchAndBound.jl")
+include("custombb/multiComponents.jl")
+include("custombb/utilities.jl")
+
+
 
 results_template = DataFrame(DataSetName=String[], n=Int[], r=Int[], k=Int[], upperbound_sdp_perm=Real[], runtime_sdp_perm=Real[], lowerbound_sdp_disj=Real[], violation_gd_disj=Real[],
 ofv_AM=Real[], violation_AM=Real[], runtime_AM=Real[]
 )
 
-
-# Note: this version of the code includes variable fixing according to the SOC relaxation.
+# Note: this file benchmarks algorithm 1, and a variant of algorithm 2 (where we make use of a variable fixing heuristic) that is ultimately not included in the paper. You may edit the file to remove the benchmarking of this variant of alg 2, if you prefer
 
 pitprops=[[1,0.954,0.364,0.342,-0.129,0.313,0.496,0.424,0.592,0.545,0.084,-0.019,0.134];
        [0.954,1,0.297,0.284,-0.118,0.291,0.503,0.419,0.648,0.569,0.076,-0.036,0.144];
@@ -27,35 +33,36 @@ pitprops=reshape(pitprops, (13,13));
 n=size(pitprops,1)
 B=sqrt(pitprops);
 
-numIters=200
+numIters=100
 
 violationPenalty=-1e1
-#
+
 # Start by running results on pitprops
 for r=2:3
     for theK=5:5:10
         results_run=similar(results_template, 0)
 
-        # Solve SOC relaxation+cuts for rounding for consistency
         usePSD=true
         useSOC=false
         useCuts=false
         doDisjoint=true
-        run_sdp_disj=@elapsed UB_sdp_disj, x_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(pitprops, r, repeat([theK], r),  usePSD, useSOC, useCuts, doDisjoint)
+        run_sdp_disj=@elapsed UB_sdp_disj, x_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(pitprops, r, repeat([theK], r),  usePSDs=usePSD, useSOCs=useSOC, useCuts=useCuts, generateDisjointFeasible=doDisjoint)
         @show UB_sdp_disj, run_sdp_disj
 
-
         indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        @show indices_reduced
         pitprops_reduced=pitprops[indices_reduced, indices_reduced]
 
-        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(pitprops_reduced, r, repeat([theK], r), numIters, -1.0*n) # Normalizing so use the same penalty as in Table 3
+        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(pitprops_reduced, r, repeat([theK], r), numIters=numIters, innerSolveMethod=:BB_warmstart) # Normalizing so use the same penalty as in Table 3
+
         @show ofv_best, violation_best
 
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Pitprops", n, r, theK, UB_sdp_disj, run_sdp_disj, LB_gd_disj, violation_gd_disj, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table4raw_pt1.csv", results_run, append=true)
+        CSV.write("table3raw_pt2.csv", results_run, append=true)
+
+
+
 
     end
 end
@@ -84,26 +91,27 @@ for r=2:3
     for theK=5:5:10
         results_run=similar(results_template, 0)
 
+        # Solve SOC relaxation+cuts for rounding for consistency
         usePSD=true
         useSOC=false
         useCuts=false
         doDisjoint=true
-        run_sdp_disj=@elapsed UB_sdp_disj, x_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(normwine, r, repeat([theK], r),  usePSD, useSOC, useCuts, doDisjoint)
+        run_sdp_disj=@elapsed UB_sdp_disj, x_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(normwine, r, repeat([theK], r),  usePSDs=usePSD, useSOCs=useSOC, useCuts=useCuts, generateDisjointFeasible=doDisjoint)
         @show UB_sdp_disj, run_sdp_disj
+
+        indices_reduced=findall(z_relax*ones(r).>=1e-3)
+        normwine_reduced=normwine[indices_reduced, indices_reduced]
 
 
         # Next, solve via the AM heuristic [using SOC relaxation]: Note: may need to change deflation code manually
-        indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        @show indices_reduced
-        normwine_reduced=normwine[indices_reduced, indices_reduced]
 
-        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(normwine_reduced, r, repeat([theK], r), numIters, -1.0*n) # Normalizing so use the same penalty as in Table 3
+        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(normwine_reduced, r, repeat([theK], r), numIters=numIters, innerSolveMethod=:BB_warmstart) # Normalizing so use the same penalty as in Table 3
         @show ofv_best, violation_best
 
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Wine", n, r, theK, UB_sdp_disj, run_sdp_disj, LB_gd_disj, violation_gd_disj, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table4raw_pt1.csv", results_run, append=true)
+        CSV.write("table3raw_pt2.csv", results_run, append=true)
 
     end
 end
@@ -121,53 +129,52 @@ for r=2:3
         useSOC=false
         useCuts=false
         doDisjoint=true
-        run_sdp_disj=@elapsed UB_sdp_disj, x_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(normionosphere, r, repeat([theK], r),  usePSD, useSOC, useCuts, doDisjoint)
+        run_sdp_disj=@elapsed UB_sdp_disj, x_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(normionosphere, r, repeat([theK], r),  usePSDs=usePSD, useSOCs=useSOC, useCuts=useCuts, generateDisjointFeasible=doDisjoint)
         @show UB_sdp_disj, run_sdp_disj
-
 
         indices_reduced=findall(z_relax*ones(r).>=1e-3)
         normionosphere_reduced=normionosphere[indices_reduced, indices_reduced]
+
         # Next, solve via the AM heuristic
 
-        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(normionosphere_reduced, r, repeat([theK], r), numIters, -1.0*n) # Normalizing so use the same penalty as in Table 3
+        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(normionosphere_reduced, r, repeat([theK], r), numIters=numIters, innerSolveMethod=:BB_warmstart) # Normalizing so use the same penalty as in Table 3
         @show ofv_best, violation_best
 
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Ionosphere", n, r, theK, UB_sdp_disj, run_sdp_disj, LB_gd_disj, violation_gd_disj, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table4raw_pt1.csv", results_run, append=true)
+        CSV.write("table3raw_pt2.csv", results_run, append=true)
 
     end
 end
 
 
-# Now do geographical [but switch the deflation code manually to SOC relaxation first]
 
 normGeographic=load("data/geography.jld",  "normGeographic")
 @show n=size(normGeographic,1)
-for r=3:3
-    for theK in [10, 20]
+for r=2:3
+    for theK in [5, 10, 20]
         results_run=similar(results_template, 0)
 
         usePSD=false
         useSOC=true
-        useCuts=false
+        useCuts=true
         doDisjoint=true
-        run_sdp_disj=@elapsed UB_sdp_disj, x_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(normGeographic, r, repeat([theK], r),  usePSD, useSOC, useCuts, doDisjoint)
+        run_sdp_disj=@elapsed UB_sdp_disj, x_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(normGeographic, r, repeat([theK], r),  usePSDs=usePSD, useSOCs=useSOC, useCuts=useCuts, generateDisjointFeasible=doDisjoint)
         @show UB_sdp_disj, run_sdp_disj
 
         indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        @show indices_reduced
         normGeographic_reduced=normGeographic[indices_reduced, indices_reduced]
 
-        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(normGeographic_reduced, r, repeat([theK], r), numIters, -1.0*n) # Normalizing so use the same penalty as in Table 3
+
+        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(normGeographic_reduced, r, repeat([theK], r), numIters=numIters, innerSolveMethod=:BB_warmstart) # Normalizing so use the same penalty as in Table 3
         @show ofv_best, violation_best
 
 
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Geography", n, r, theK, UB_sdp_disj, run_sdp_disj, LB_gd_disj, violation_gd_disj, ofv_best, violation_best, runtime_deflation+run_sdp_disj])
-        CSV.write("table4raw_pt2.csv", results_run, append=true)
+        CSV.write("table3raw_pt2.csv", results_run, append=true)
 
     end
 end
@@ -185,22 +192,21 @@ for r=2:3
         useSOC=true
         useCuts=true
         doDisjoint=true
-        run_sdp_disj=@elapsed UB_sdp_disj, x_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(normcommunities, r, repeat([theK], r),  usePSD, useSOC, useCuts, doDisjoint)
+        run_sdp_disj=@elapsed UB_sdp_disj, x_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(normcommunities, r, repeat([theK], r),  usePSDs=usePSD, useSOCs=useSOC, useCuts=useCuts, generateDisjointFeasible=doDisjoint)
         @show UB_sdp_disj, run_sdp_disj
-
-        indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        @show indices_reduced
-        normcommunities_reduced=normcommunities[indices_reduced, indices_reduced]
 
         # Next, solve via the AM heuristic [using SOC relaxation]: Note: may need to change deflation code manually
 
-        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(normcommunities_reduced, r, repeat([theK], r), numIters, -1.0*n) # Normalizing so use the same penalty as in Table 3
+        indices_reduced=findall(z_relax*ones(r).>=1e-3)
+        normcommunities_reduced=normcommunities[indices_reduced, indices_reduced]
+
+        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(normcommunities_reduced, r, repeat([theK], r), numIters=numIters, innerSolveMethod=:BB_warmstart) # Normalizing so use the same penalty as in Table 3
         @show ofv_best, violation_best
 
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["communities", n, r, theK, UB_sdp_disj, run_sdp_disj, LB_gd_disj, violation_gd_disj, ofv_best, violation_best, runtime_deflation+run_sdp_disj])
-        CSV.write("table4raw_pt1.csv", results_run, append=true)
+        CSV.write("table3raw_pt2.csv", results_run, append=true)
 
     end
 end
@@ -225,27 +231,25 @@ for r=2:3
         results_run=similar(results_template, 0)
 
         # Solve SOC relaxation+cuts for rounding for consistency
-        # Solve SOC relaxation+cuts for rounding for consistency
         usePSD=false
         useSOC=true
         useCuts=false
         doDisjoint=true
-        run_sdp_disj=@elapsed UB_sdp_disj, x_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(normarrhythmia, r, repeat([theK], r),  usePSD, useSOC, useCuts, doDisjoint)
+        run_sdp_disj=@elapsed UB_sdp_disj, x_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(normarrhythmia, r, repeat([theK], r),  usePSDs=usePSD, useSOCs=useSOC, useCuts=useCuts, generateDisjointFeasible=doDisjoint)
         @show UB_sdp_disj, run_sdp_disj
 
         indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        @show indices_reduced
         normarrhythmia_reduced=normarrhythmia[indices_reduced, indices_reduced]
 
         # Next, solve via the AM heuristic [using SOC relaxation]: Note: may need to change deflation code manually
 
-        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(normarrhythmia_reduced, r, repeat([theK], r), numIters, -1.0*n) # Normalizing so use the same penalty as in Table 3
+        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(normarrhythmia_reduced, r, repeat([theK], r), numIters=numIters, innerSolveMethod=:BB_warmstart) # Normalizing so use the same penalty as in Table 3
         @show ofv_best, violation_best
 
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Arrhythmia", n, r, theK, UB_sdp_disj, run_sdp_disj, LB_gd_disj, violation_gd_disj, ofv_best, violation_best, runtime_deflation+run_sdp_disj])
-        CSV.write("table4raw_pt1.csv", results_run, append=true)
+        CSV.write("table3raw_pt2.csv", results_run, append=true)
 
     end
 end
@@ -263,23 +267,136 @@ for r=2:3
         useSOC=true
         useCuts=false
         doDisjoint=true
-        run_sdp_disj=@elapsed UB_sdp_disj, z_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(micromass, r, repeat([theK], r),  usePSD, useSOC, useCuts, doDisjoint)
+        run_sdp_disj=@elapsed UB_sdp_disj, z_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(micromass, r, repeat([theK], r),  usePSDs=usePSD, useSOCs=useSOC, useCuts=useCuts, generateDisjointFeasible=doDisjoint, highDim=true)
         @show UB_sdp_disj, run_sdp_disj, LB_gd_disj
 
-
-        # Next, solve via the AM heuristic with variable fixing [using SOC relaxation]: Note: may need to change deflation code manually
         indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        @show indices_reduced
         micromass_reduced=micromass[indices_reduced, indices_reduced]
 
-
-        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(micromass_reduced, r, repeat([theK], r), numIters, -1.0*n) # Normalizing so use the same penalty as in Table 3
+        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(micromass_reduced, r, repeat([theK], r), numIters=numIters, innerSolveMethod=:BB_warmstart) # Normalizing so use the same penalty as in Table 3
         @show ofv_best, violation_best
 
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["micromass", n, r, theK, UB_sdp_disj, run_sdp_disj, LB_gd_disj, violation_gd_disj, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table4raw_pt1.csv", results_run, append=true)
+        CSV.write("table3raw_pt2.csv", results_run, append=true)
+
+    end
+end
+
+lung=load("data/lung.jld", "normlung");
+n=size(lung, 1)
+
+for r=2:3
+    for theK in [5, 10, 20]
+        results_run=similar(results_template, 0)
+
+        # Solve SOC relaxation+cuts for rounding for consistency
+        usePSD=true
+        useSOC=false
+        useCuts=false
+        doDisjoint=true
+        run_sdp_disj=@elapsed UB_sdp_disj, z_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(lung, r, repeat([theK], r),  usePSDs=usePSD, useSOCs=useSOC, useCuts=useCuts, generateDisjointFeasible=doDisjoint, highDim=false)
+        @show UB_sdp_disj, run_sdp_disj, LB_gd_disj
+
+        indices_reduced=findall(z_relax*ones(r).>=1e-3)
+        lung_reduced=lung[indices_reduced, indices_reduced]
+
+        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(lung_reduced, r, repeat([theK], r), numIters=numIters, innerSolveMethod=:BB_warmstart) # Normalizing so use the same penalty as in Table 3
+        @show ofv_best, violation_best
+
+
+        # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
+        push!(results_run, ["lung", n, r, theK, UB_sdp_disj, run_sdp_disj, LB_gd_disj, violation_gd_disj, ofv_best, violation_best, runtime_deflation])
+        CSV.write("table3raw_pt2.csv", results_run, append=true)
+
+    end
+end
+
+gait=load("data/gait.jld", "normgait");
+n=size(gait, 1)
+
+for r=2:3
+    for theK in [5, 10, 20]
+        results_run=similar(results_template, 0)
+
+        # Solve SOC relaxation+cuts for rounding for consistency
+        usePSD=false
+        useSOC=true
+        useCuts=false
+        doDisjoint=true
+        run_sdp_disj=@elapsed UB_sdp_disj, z_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(gait, r, repeat([theK], r),  usePSDs=usePSD, useSOCs=useSOC, useCuts=useCuts, generateDisjointFeasible=doDisjoint, highDim=false)
+        @show UB_sdp_disj, run_sdp_disj, LB_gd_disj
+
+        indices_reduced=findall(z_relax*ones(r).>=1e-3)
+        gait_reduced=gait[indices_reduced, indices_reduced]
+
+        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(gait_reduced, r, repeat([theK], r), numIters=numIters, innerSolveMethod=:BB_warmstart) # Normalizing so use the same penalty as in Table 3
+        @show ofv_best, violation_best
+
+
+        # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
+        push!(results_run, ["gait", n, r, theK, UB_sdp_disj, run_sdp_disj, LB_gd_disj, violation_gd_disj, ofv_best, violation_best, runtime_deflation])
+        CSV.write("table3raw_pt2.csv", results_run, append=true)
+
+    end
+end
+
+voice=load("data/voice.jld", "normvoice");
+n=size(voice, 1)
+
+for r=2:3
+    for theK in [5, 10, 20]
+        results_run=similar(results_template, 0)
+
+        # Solve SOC relaxation+cuts for rounding for consistency
+        usePSD=false
+        useSOC=true
+        useCuts=false
+        doDisjoint=true
+        run_sdp_disj=@elapsed UB_sdp_disj, z_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(voice, r, repeat([theK], r),  usePSDs=usePSD, useSOCs=useSOC, useCuts=useCuts, generateDisjointFeasible=doDisjoint, highDim=false)
+        @show UB_sdp_disj, run_sdp_disj, LB_gd_disj
+
+        indices_reduced=findall(z_relax*ones(r).>=1e-3)
+        voice_reduced=voice[indices_reduced, indices_reduced]
+
+        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(voice_reduced, r, repeat([theK], r), numIters=numIters, innerSolveMethod=:BB_warmstart) # Normalizing so use the same penalty as in Table 3
+        @show ofv_best, violation_best
+
+
+        # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
+        push!(results_run, ["voice", n, r, theK, UB_sdp_disj, run_sdp_disj, LB_gd_disj, violation_gd_disj, ofv_best, violation_best, runtime_deflation])
+        CSV.write("table3raw_pt2.csv", results_run, append=true)
+
+    end
+end
+
+
+gastro=load("data/gastro.jld", "normgastro");
+n=size(gastro, 1)
+
+for r=2:3
+    for theK in [5, 10, 20]
+        results_run=similar(results_template, 0)
+
+        # Solve SOC relaxation+cuts for rounding for consistency
+        usePSD=false
+        useSOC=true
+        useCuts=false
+        doDisjoint=true
+        run_sdp_disj=@elapsed UB_sdp_disj, z_rounded, LB_gd_disj, violation_gd_disj, z_relax = getSDPUpperBound_gd_multiple_permutation(gastro, r, repeat([theK], r),  usePSDs=usePSD, useSOCs=useSOC, useCuts=useCuts, generateDisjointFeasible=doDisjoint, highDim=false)
+        @show UB_sdp_disj, run_sdp_disj, LB_gd_disj
+
+        indices_reduced=findall(z_relax*ones(r).>=1e-3)
+        gastro_reduced=gastro[indices_reduced, indices_reduced]
+
+        ofv_best, violation_best, runtime_deflation, x_best=findmultPCs_deflation(gastro_reduced, r, repeat([theK], r), numIters=numIters, innerSolveMethod=:BB_warmstart) # Normalizing so use the same penalty as in Table 3
+        @show ofv_best, violation_best
+
+
+        # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
+        push!(results_run, ["gastro", n, r, theK, UB_sdp_disj, run_sdp_disj, LB_gd_disj, violation_gd_disj, ofv_best, violation_best, runtime_deflation])
+        CSV.write("table3raw_pt2.csv", results_run, append=true)
 
     end
 end
