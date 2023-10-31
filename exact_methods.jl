@@ -150,7 +150,9 @@ function solveExact_direct(Sigma::Array{Float64, 2}, k::Int64, r::Int64; targetS
         @constraint(exact_model, U.<=U_abs)
         @constraint(exact_model, -U.<=U_abs)
         @constraint(exact_model, imposePCTarget2[t=1:r], sum(U_abs[:,t])<=sqrt(targetSparsity[t]))
-        @constraint(exact_model, imposePCTargetSOC[t=1:r], [sum(z[:,t])+1.0; sum(z[:,t])-1.0; 2.0*sum(U_abs[:,t])] in SecondOrderCone())
+        if minimum(targetSparsity-k)<=1e-4 # This corresponds to the case where k_t is not specific, in which case we default to k_t=
+            @constraint(exact_model, imposePCTargetSOC[t=1:r], [sum(z[:,t])+1.0; sum(z[:,t])-1.0; 2.0*sum(U_abs[:,t])] in SecondOrderCone())
+        end
 
     end
 
