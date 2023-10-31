@@ -13,7 +13,7 @@ The software in this package is designed to provide certifiably near-optimal sol
 `max tr(U'QU)`
 `s.t. ||U||_0 <=k, U'U=I`
 
-using a relax-and-round, exact, or Lagrangian relaxation approach.
+using a relax-and-round (sdp_bounds.jl), exact (exact_methods.jl), or Lagrangian relaxation (iterative_deflation3.jl) approach.
 
 
 ## Installation and set up
@@ -24,7 +24,7 @@ Several packages must be installed in Julia before the code can be run.  These p
 
 
 ## Correspondence between script files and figures/tables in the paper
-- - The file "createTable1.jl" produces the output used to generate Table 1 in our manuscript. 
+- The file "createTable1.jl" produces the output used to generate Table 1 in our manuscript. 
 - The files "createTable2_x.jl" produce the output used to generate Table 2, and Tables EC.6-EC.15 in our manuscript (where the "x" denotes the method run—note that you will need to run some of the methods from the literature we benchmarked against yourself; we provide the code for our methods and those from the literature implemented in Julia in this repo).
 - The file "createFigure3.jl" produces the output used to generate Figure 3, Table 3, and Figure EC.1 in our manuscript. 
 - The file "createTableec2.jl" produces the output used to generate Table EC.2 in our manuscript. 
