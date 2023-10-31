@@ -32,7 +32,7 @@ Several packages must be installed in Julia before the code can be run.  These p
 - The file "createTableec3_to_ec5.jl" produces the output used to generate Tables EC.3-EC.5 in our manuscript. 
 
 
-Note that you may need more RAM than is available on a standard laptop to reproduce the output for some of the largest datasets considered in the paper.
+Note that you may need more RAM than is available on a standard laptop to run our SDP relaxation methods on the largest datasets considered in the paper. However, the deflation method should run at scale.
 
 ## Related Packages
 
