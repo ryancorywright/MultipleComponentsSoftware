@@ -26,6 +26,7 @@ Several packages must be installed in Julia before the code can be run.  These p
 ## Correspondence between script files and figures/tables in the paper
 - The file "createTable1.jl" produces the output used to generate Table 1 in our manuscript. 
 - The files "createTable2_x.jl" produce the output used to generate Table 2, and Tables EC.6-EC.15 in our manuscript (where the "x" denotes the method run—note that you will need to run some of the methods from the literature we benchmarked against yourself; we provide the code for our methods and those from the literature implemented in Julia in this repo).
+- The file "pipeline_generate_syntheticdata.jl" and "createFigures_1_to_2.jl" generate the synthetic datasets and produce the output used to generate Figures 1-2 in our manuscript. 
 - The file "createFigure3.jl" produces the output used to generate Figure 3, Table 3, and Figure EC.1 in our manuscript. 
 - The file "createTableec2.jl" produces the output used to generate Table EC.2 in our manuscript. 
 - The file "createTableec3_to_ec5.jl" produces the output used to generate Tables EC.3-EC.5 in our manuscript. 
