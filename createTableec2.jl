@@ -53,7 +53,7 @@ for r=2:3
         ])
 
 
-        CSV.write("exploreUCI_bounds_table2_v2.csv", results_run, append=true)
+        CSV.write("tableec2.csv", results_run, append=true)
         results_run=similar(results_template, 0)
 
 
@@ -111,7 +111,7 @@ for r=2:3
         ])
 
 
-        CSV.write("exploreUCI_bounds_table2_v2.csv", results_run, append=true)
+        CSV.write("tableec2.csv", results_run, append=true)
         results_run=similar(results_template, 0)
 
 
@@ -151,7 +151,7 @@ for r=2:3
             ])
 
 
-            CSV.write("exploreUCI_bounds_table2_v2.csv", results_run, append=true)
+            CSV.write("tableec2.csv", results_run, append=true)
             results_run=similar(results_template, 0)
 
 
@@ -194,7 +194,7 @@ for r=2:3
             ])
 
 
-            CSV.write("exploreUCI_bounds_table2_v2.csv", results_run, append=true)
+            CSV.write("tableec2.csv", results_run, append=true)
             results_run=similar(results_template, 0)
 
 
@@ -238,7 +238,7 @@ for r=2:3
         ])
 
 
-        CSV.write("exploreUCI_bounds_table2_v2.csv", results_run, append=true)
+        CSV.write("tableec2.csv", results_run, append=true)
         results_run=similar(results_template, 0)
 
 
@@ -291,7 +291,7 @@ for r=2:3
         ])
 
 
-        CSV.write("exploreUCI_bounds_table2_v2.csv", results_run, append=true)
+        CSV.write("tableec2.csv", results_run, append=true)
         results_run=similar(results_template, 0)
 
 
@@ -337,7 +337,7 @@ for r=2:3
         ])
 
 
-        CSV.write("exploreUCI_bounds_table2_v2.csv", results_run, append=true)
+        CSV.write("tableec2.csv", results_run, append=true)
         results_run=similar(results_template, 0)
 
 

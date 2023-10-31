@@ -46,7 +46,7 @@ for r=2:3
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Pitprops", n, r, theK, ofv_threshold, viol_threshold, runtime_threshold])
 
-        CSV.write("table4raw_thresholding.csv", results_run, append=true)
+        CSV.write("table2raw_thresholding.csv", results_run, append=true)
 
 
     end
@@ -87,7 +87,7 @@ for r=2:3
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Wine", n, r, theK, ofv_threshold, viol_threshold, runtime_threshold])
 
-        CSV.write("table4raw_thresholding.csv", results_run, append=true)
+        CSV.write("table2raw_thresholding.csv", results_run, append=true)
         
 
 
@@ -114,7 +114,7 @@ for r=2:3
                 # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
                 push!(results_run, ["Ionosphere", n, r, theK, ofv_threshold, viol_threshold, runtime_threshold])
         
-                CSV.write("table4raw_thresholding.csv", results_run, append=true)
+                CSV.write("table2raw_thresholding.csv", results_run, append=true)
 
     end
 end
@@ -137,7 +137,7 @@ for r=2:3
                 # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
                 push!(results_run, ["Geography", n, r, theK, ofv_threshold, viol_threshold, runtime_threshold])
         
-                CSV.write("table4raw_thresholding.csv", results_run, append=true)
+                CSV.write("table2raw_thresholding.csv", results_run, append=true)
     end
 end
 
@@ -160,7 +160,7 @@ for r=2:3
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Communities", n, r, theK, ofv_threshold, viol_threshold, runtime_threshold])
                 
-        CSV.write("table4raw_thresholding.csv", results_run, append=true)
+        CSV.write("table2raw_thresholding.csv", results_run, append=true)
 
     end
 end
@@ -195,7 +195,7 @@ for r=2:3
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Arrhythmia", n, r, theK, ofv_threshold, viol_threshold, runtime_threshold])
 
-        CSV.write("table4raw_thresholding.csv", results_run, append=true)
+        CSV.write("table2raw_thresholding.csv", results_run, append=true)
 
     end
 end
@@ -219,7 +219,7 @@ for r=2:3
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Micromass", n, r, theK, ofv_threshold, viol_threshold, runtime_threshold])
 
-        CSV.write("table4raw_thresholding.csv", results_run, append=true)
+        CSV.write("table2raw_thresholding.csv", results_run, append=true)
 
     end
 end
@@ -242,7 +242,7 @@ for r=2:3
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["lung", n, r, theK, ofv_threshold, viol_threshold, runtime_threshold])
 
-        CSV.write("table4raw_thresholding.csv", results_run, append=true)
+        CSV.write("table2raw_thresholding.csv", results_run, append=true)
 
     end
 end
@@ -265,7 +265,7 @@ for r=2:3
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["gait", n, r, theK, ofv_threshold, viol_threshold, runtime_threshold])
 
-        CSV.write("table4raw_thresholding.csv", results_run, append=true)
+        CSV.write("table2raw_thresholding.csv", results_run, append=true)
 
     end
 end
@@ -288,7 +288,7 @@ for r=2:3
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["voice", n, r, theK, ofv_threshold, viol_threshold, runtime_threshold])
 
-        CSV.write("table4raw_thresholding.csv", results_run, append=true)
+        CSV.write("table2raw_thresholding.csv", results_run, append=true)
 
     end
 end
@@ -309,7 +309,7 @@ for r=2:3
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["gastro", n, r, theK, ofv_threshold, viol_threshold, runtime_threshold])
 
-        CSV.write("table4raw_thresholding.csv", results_run, append=true)
+        CSV.write("table2raw_thresholding.csv", results_run, append=true)
 
     end
 end

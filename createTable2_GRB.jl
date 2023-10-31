@@ -1,14 +1,10 @@
 include("core_julia1p7.jl")
 include("sdp_bounds.jl")
-include("iterative_deflation.jl")
+include("iterative_deflation3.jl")
 include("exact_methods.jl")
 
 
-# Note that this version of the code also considers the possibility of invoking a variable fixing heuristic, which is not described in the paper because we found it to be ineffective in practice. 
-# You may remove this heuristic, by commenting out the parts of the code where you solve a relaxation+the part where you run the "reduced" method+altering the DataFrame used to record the results.
-
-results_template = DataFrame(DataSetName=String[], n=Int[], r=Int[], k=Int[], upperbound_sdp_perm=Real[], runtime_sdp_perm=Real[], lowerbound_grb_full=Real[], violation_grb_full=Real[], runtime_grb_full=Real[], nodes_grb_full=Int[],
-ofv_grb_fixed=Real[], violation_grb_fixed=Real[], runtime_grb_fixed=Real[], nodes_grb_reduced=Int[]
+results_template = DataFrame(DataSetName=String[], n=Int[], r=Int[], k=Int[], upperbound_sdp_perm=Real[], runtime_sdp_perm=Real[], lowerbound_grb_full=Real[], violation_grb_full=Real[], runtime_grb_full=Real[], nodes_grb_full=Int[]
 )
 
 pitprops=[[1,0.954,0.364,0.342,-0.129,0.313,0.496,0.424,0.592,0.545,0.084,-0.019,0.134];
@@ -51,27 +47,18 @@ for r=2:3
         z_rounded=1.0*(abs.(x_rounded).>1e-4)
 
 
-        # Next, solve via Gurobi (full) with time limit of 1 hour
+        # Next, solve via Gurobi (full) 
         run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(pitprops, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded)
         ofv_exact=tr(U_exact'*pitprops*U_exact)
         violation_exact=sum(abs.(U_exact'*U_exact.-Diagonal(ones(r))))
         @show ofv_exact, violation_exact
 
-        # Next, reduce the set of indices and run the same thing again
-        indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        pitprops_reduced=pitprops[indices_reduced, indices_reduced]
-
-        run_exact_reduced=@elapsed ofv_exact_reduced, bound_exact_reduced, nodes_exact_reduced, gap_exact_reduced, U_exact_reduced, z_exact_reduced=solveExact_direct(pitprops_reduced, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded[indices_reduced,:])
-        ofv_exact_reduced=tr(U_exact_reduced'*pitprops_reduced*U_exact_reduced)
-        violation_exact_reduced=sum(abs.(U_exact_reduced'*U_exact_reduced.-Diagonal(ones(r))))
-        @show ofv_exact, violation_exact
 
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
-        push!(results_run, ["Pitprops", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact,
-            ofv_exact_reduced, violation_exact_reduced, run_exact_reduced, nodes_exact_reduced])
+        push!(results_run, ["Pitprops", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact])
 
-        CSV.write("table4raw_pt2_grb.csv", results_run, append=true)
+        CSV.write("table2_grb.csv", results_run, append=true)
 
 
     end
@@ -112,27 +99,19 @@ for r=2:3
         z_rounded=1.0*(abs.(x_rounded).>1e-4)
 
 
-        # Next, solve via Gurobi (full) with time limit of 1 hour
+        # Next, solve via Gurobi (full)
         run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(normwine, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded)
         ofv_exact=tr(U_exact'*normwine*U_exact)
         violation_exact=sum(abs.(U_exact'*U_exact.-Diagonal(ones(r))))
         @show ofv_exact, violation_exact
 
-        # Next, reduce the set of indices and run the same thing again
-        indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        normwine_reduced=normwine[indices_reduced, indices_reduced]
-
-        run_exact_reduced=@elapsed ofv_exact_reduced, bound_exact_reduced, nodes_exact_reduced, gap_exact_reduced, U_exact_reduced, z_exact_reduced=solveExact_direct(normwine_reduced, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded[indices_reduced,:])
-        ofv_exact_reduced=tr(U_exact_reduced'*normwine_reduced*U_exact_reduced)
-        violation_exact_reduced=sum(abs.(U_exact_reduced'*U_exact_reduced.-Diagonal(ones(r))))
-        @show ofv_exact, violation_exact
+       
 
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
-        push!(results_run, ["Wine", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact,
-            ofv_exact_reduced, violation_exact_reduced, run_exact_reduced, nodes_exact_reduced])
+        push!(results_run, ["Wine", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact])
 
-        CSV.write("table4raw_pt2_grb.csv", results_run, append=true)
+        CSV.write("table2_grb.csv", results_run, append=true)
 
 
     end
@@ -158,27 +137,17 @@ for r=2:3
         z_rounded=1.0*(abs.(x_rounded).>1e-4)
 
 
-        # Next, solve via Gurobi (full) with time limit of 1 hour
+        # Next, solve via Gurobi (full) 
         run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(normionosphere, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded)
         ofv_exact=tr(U_exact'*normionosphere*U_exact)
         violation_exact=sum(abs.(U_exact'*U_exact.-Diagonal(ones(r))))
         @show ofv_exact, violation_exact
 
-        # Next, reduce the set of indices and run the same thing again
-        indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        normionosphere_reduced=normionosphere[indices_reduced, indices_reduced]
-
-        run_exact_reduced=@elapsed ofv_exact_reduced, bound_exact_reduced, nodes_exact_reduced, gap_exact_reduced, U_exact_reduced, z_exact_reduced=solveExact_direct(normionosphere_reduced, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded[indices_reduced,:])
-        ofv_exact_reduced=tr(U_exact_reduced'*normionosphere_reduced*U_exact_reduced)
-        violation_exact_reduced=sum(abs.(U_exact_reduced'*U_exact_reduced.-Diagonal(ones(r))))
-        @show ofv_exact, violation_exact
-
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
-        push!(results_run, ["Ionosphere", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact,
-            ofv_exact_reduced, violation_exact_reduced, run_exact_reduced, nodes_exact_reduced])
+        push!(results_run, ["Ionosphere", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact])
 
-        CSV.write("table4raw_pt2_grb.csv", results_run, append=true)
+        CSV.write("table2_grb.csv", results_run, append=true)
 
     end
 end
@@ -203,27 +172,19 @@ for r=2:3
         z_rounded=1.0*(abs.(x_rounded).>1e-4)
 
 
-        # Next, solve via Gurobi (full) with time limit of 1 hour
+        # Next, solve via Gurobi (full) 
         run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(normGeographic, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded)
         ofv_exact=tr(U_exact'*normGeographic*U_exact)
         violation_exact=sum(abs.(U_exact'*U_exact.-Diagonal(ones(r))))
         @show ofv_exact, violation_exact
 
-        # Next, reduce the set of indices and run the same thing again
-        indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        normGeographic_reduced=normGeographic[indices_reduced, indices_reduced]
-
-        run_exact_reduced=@elapsed ofv_exact_reduced, bound_exact_reduced, nodes_exact_reduced, gap_exact_reduced, U_exact_reduced, z_exact_reduced=solveExact_direct(normGeographic_reduced, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded[indices_reduced,:])
-        ofv_exact_reduced=tr(U_exact_reduced'*normGeographic_reduced*U_exact_reduced)
-        violation_exact_reduced=sum(abs.(U_exact_reduced'*U_exact_reduced.-Diagonal(ones(r))))
-        @show ofv_exact_reduced, violation_exact_reduced
+       
 
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
-        push!(results_run, ["Geographical", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact,
-            ofv_exact_reduced, violation_exact_reduced, run_exact_reduced, nodes_exact_reduced])
+        push!(results_run, ["Geographical", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact])
 
-        CSV.write("table4raw_pt2_grb.csv", results_run, append=true)
+        CSV.write("table2_grb.csv", results_run, append=true)
 
     end
 end
@@ -247,27 +208,18 @@ for r=2:3
         z_rounded=1.0*(abs.(x_rounded).>1e-4)
 
 
-        # Next, solve via Gurobi (full) with time limit of 1 hour
+        # Next, solve via Gurobi (full) 
         run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(normcommunities, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded)
         ofv_exact=tr(U_exact'*normcommunities*U_exact)
         violation_exact=sum(abs.(U_exact'*U_exact.-Diagonal(ones(r))))
         @show ofv_exact, violation_exact
 
-        # Next, reduce the set of indices and run the same thing again
-        indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        normcommunities_reduced=normcommunities[indices_reduced, indices_reduced]
-
-        run_exact_reduced=@elapsed ofv_exact_reduced, bound_exact_reduced, nodes_exact_reduced, gap_exact_reduced, U_exact_reduced, z_exact_reduced=solveExact_direct(normcommunities_reduced, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded[indices_reduced,:])
-        ofv_exact_reduced=tr(U_exact_reduced'*normcommunities_reduced*U_exact_reduced)
-        violation_exact_reduced=sum(abs.(U_exact_reduced'*U_exact_reduced.-Diagonal(ones(r))))
-        @show ofv_exact, violation_exact
-
+       
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
-        push!(results_run, ["Communities", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact,
-            ofv_exact_reduced, violation_exact_reduced, run_exact_reduced, nodes_exact_reduced])
+        push!(results_run, ["Communities", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact])
 
-        CSV.write("table4raw_pt2_grb.csv", results_run, append=true)
+        CSV.write("table2_grb.csv", results_run, append=true)
 
     end
 end
@@ -301,27 +253,18 @@ for r=2:3
         z_rounded=1.0*(abs.(x_rounded).>1e-4)
 
 
-        # Next, solve via Gurobi (full) with time limit of 1 hour
+        # Next, solve via Gurobi (full) 
         run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(normarrhythmia, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded)
         ofv_exact=tr(U_exact'*normarrhythmia*U_exact)
         violation_exact=sum(abs.(U_exact'*U_exact.-Diagonal(ones(r))))
         @show ofv_exact, violation_exact
 
-        # Next, reduce the set of indices and run the same thing again
-        indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        normarrhythmia_reduced=normarrhythmia[indices_reduced, indices_reduced]
-
-        run_exact_reduced=@elapsed ofv_exact_reduced, bound_exact_reduced, nodes_exact_reduced, gap_exact_reduced, U_exact_reduced, z_exact_reduced=solveExact_direct(normarrhythmia_reduced, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded[indices_reduced,:])
-        ofv_exact_reduced=tr(U_exact_reduced'*normarrhythmia_reduced*U_exact_reduced)
-        violation_exact_reduced=sum(abs.(U_exact_reduced'*U_exact_reduced.-Diagonal(ones(r))))
-        @show ofv_exact, violation_exact
-
+  
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
-        push!(results_run, ["Arrhythmia", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact,
-            ofv_exact_reduced, violation_exact_reduced, run_exact_reduced, nodes_exact_reduced])
+        push!(results_run, ["Arrhythmia", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact])
 
-        CSV.write("table4raw_pt2_grb.csv", results_run, append=true)
+        CSV.write("table2_grb.csv", results_run, append=true)
 
     end
 end
@@ -344,27 +287,18 @@ for r=2:3
         z_rounded=1.0*(abs.(x_rounded).>1e-4)
 
 
-        # Next, solve via Gurobi (full) with time limit of 1 hour
+        # Next, solve via Gurobi (full)
         run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(micromass, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded)
         ofv_exact=tr(U_exact'*micromass*U_exact)
         violation_exact=sum(abs.(U_exact'*U_exact.-Diagonal(ones(r))))
         @show ofv_exact, violation_exact
 
-        # Next, reduce the set of indices and run the same thing again
-        indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        micromass_reduced=micromass[indices_reduced, indices_reduced]
-
-        run_exact_reduced=@elapsed ofv_exact_reduced, bound_exact_reduced, nodes_exact_reduced, gap_exact_reduced, U_exact_reduced, z_exact_reduced=solveExact_direct(micromass_reduced, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded[indices_reduced,:])
-        ofv_exact_reduced=tr(U_exact_reduced'*micromass_reduced*U_exact_reduced)
-        violation_exact_reduced=sum(abs.(U_exact_reduced'*U_exact_reduced.-Diagonal(ones(r))))
-        @show ofv_exact, violation_exact
 
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
-        push!(results_run, ["Micromass", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact,
-            ofv_exact_reduced, violation_exact_reduced, run_exact_reduced, nodes_exact_reduced])
+        push!(results_run, ["Micromass", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact])
 
-        CSV.write("table4raw_pt2_grb.csv", results_run, append=true)
+        CSV.write("table2_grb.csv", results_run, append=true)
 
     end
 end
@@ -387,27 +321,17 @@ for r=2:3
         z_rounded=1.0*(abs.(x_rounded).>1e-4)
 
 
-        # Next, solve via Gurobi (full) with time limit of 1 hour
+        # Next, solve via Gurobi (full)
         run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(lung, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded)
         ofv_exact=tr(U_exact'*lung*U_exact)
         violation_exact=sum(abs.(U_exact'*U_exact.-Diagonal(ones(r))))
         @show ofv_exact, violation_exact
 
-        # Next, reduce the set of indices and run the same thing again
-        indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        lung_reduced=lung[indices_reduced, indices_reduced]
-
-        run_exact_reduced=@elapsed ofv_exact_reduced, bound_exact_reduced, nodes_exact_reduced, gap_exact_reduced, U_exact_reduced, z_exact_reduced=solveExact_direct(lung_reduced, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded[indices_reduced,:])
-        ofv_exact_reduced=tr(U_exact_reduced'*lung_reduced*U_exact_reduced)
-        violation_exact_reduced=sum(abs.(U_exact_reduced'*U_exact_reduced.-Diagonal(ones(r))))
-        @show ofv_exact, violation_exact
-
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
-        push!(results_run, ["lung", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact,
-            ofv_exact_reduced, violation_exact_reduced, run_exact_reduced, nodes_exact_reduced])
+        push!(results_run, ["lung", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact])
 
-        CSV.write("table4raw_pt2_grb.csv", results_run, append=true)
+        CSV.write("table2_grb.csv", results_run, append=true)
 
     end
 end
@@ -429,27 +353,18 @@ for r=2:3
         z_rounded=1.0*(abs.(x_rounded).>1e-4)
 
 
-        # Next, solve via Gurobi (full) with time limit of 1 hour
+        # Next, solve via Gurobi (full) 
         run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(gait, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded)
         ofv_exact=tr(U_exact'*gait*U_exact)
         violation_exact=sum(abs.(U_exact'*U_exact.-Diagonal(ones(r))))
         @show ofv_exact, violation_exact
 
-        # Next, reduce the set of indices and run the same thing again
-        indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        gait_reduced=gait[indices_reduced, indices_reduced]
-
-        run_exact_reduced=@elapsed ofv_exact_reduced, bound_exact_reduced, nodes_exact_reduced, gap_exact_reduced, U_exact_reduced, z_exact_reduced=solveExact_direct(gait_reduced, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded[indices_reduced,:])
-        ofv_exact_reduced=tr(U_exact_reduced'*gait_reduced*U_exact_reduced)
-        violation_exact_reduced=sum(abs.(U_exact_reduced'*U_exact_reduced.-Diagonal(ones(r))))
-        @show ofv_exact, violation_exact
-
+       
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
-        push!(results_run, ["gait", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact,
-            ofv_exact_reduced, violation_exact_reduced, run_exact_reduced, nodes_exact_reduced])
+        push!(results_run, ["gait", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact])
 
-        CSV.write("table4raw_pt2_grb.csv", results_run, append=true)
+        CSV.write("table2_grb.csv", results_run, append=true)
 
     end
 end
@@ -471,27 +386,17 @@ for r=2:3
         z_rounded=1.0*(abs.(x_rounded).>1e-4)
 
 
-        # Next, solve via Gurobi (full) with time limit of 1 hour
+        # Next, solve via Gurobi (full)
         run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(voice, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded)
         ofv_exact=tr(U_exact'*voice*U_exact)
         violation_exact=sum(abs.(U_exact'*U_exact.-Diagonal(ones(r))))
         @show ofv_exact, violation_exact
 
-        # Next, reduce the set of indices and run the same thing again
-        indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        voice_reduced=voice[indices_reduced, indices_reduced]
-
-        run_exact_reduced=@elapsed ofv_exact_reduced, bound_exact_reduced, nodes_exact_reduced, gap_exact_reduced, U_exact_reduced, z_exact_reduced=solveExact_direct(voice_reduced, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded[indices_reduced,:])
-        ofv_exact_reduced=tr(U_exact_reduced'*voice_reduced*U_exact_reduced)
-        violation_exact_reduced=sum(abs.(U_exact_reduced'*U_exact_reduced.-Diagonal(ones(r))))
-        @show ofv_exact, violation_exact
-
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
-        push!(results_run, ["voice", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact,
-            ofv_exact_reduced, violation_exact_reduced, run_exact_reduced, nodes_exact_reduced])
+        push!(results_run, ["voice", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact])
 
-        CSV.write("table4raw_pt2_grb.csv", results_run, append=true)
+        CSV.write("table2_grb.csv", results_run, append=true)
 
     end
 end
@@ -513,27 +418,18 @@ for r=2:3
         z_rounded=1.0*(abs.(x_rounded).>1e-4)
 
 
-        # Next, solve via Gurobi (full) with time limit of 1 hour
+        # Next, solve via Gurobi (full)
         run_exact=@elapsed ofv_exact, bound_exact, nodes_exact, gap_exact, U_exact, z_exact=solveExact_direct(gastro, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded)
         ofv_exact=tr(U_exact'*gastro*U_exact)
         violation_exact=sum(abs.(U_exact'*U_exact.-Diagonal(ones(r))))
         @show ofv_exact, violation_exact
 
-        # Next, reduce the set of indices and run the same thing again
-        indices_reduced=findall(z_relax*ones(r).>=1e-3)
-        gastro_reduced=gastro[indices_reduced, indices_reduced]
-
-        run_exact_reduced=@elapsed ofv_exact_reduced, bound_exact_reduced, nodes_exact_reduced, gap_exact_reduced, U_exact_reduced, z_exact_reduced=solveExact_direct(gastro_reduced, theK*r, r, targetSparsity=repeat([theK], r), timeLimit=runtime_grb, theGap=1e-4, use_ell1=true, warmStart=z_rounded[indices_reduced,:])
-        ofv_exact_reduced=tr(U_exact_reduced'*gastro_reduced*U_exact_reduced)
-        violation_exact_reduced=sum(abs.(U_exact_reduced'*U_exact_reduced.-Diagonal(ones(r))))
-        @show ofv_exact, violation_exact
 
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
-        push!(results_run, ["gastro", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact,
-            ofv_exact_reduced, violation_exact_reduced, run_exact_reduced, nodes_exact_reduced])
+        push!(results_run, ["gastro", n, r, theK, UB_sdp_disj, run_sdp_disj, ofv_exact, violation_exact, run_exact, nodes_exact])
 
-        CSV.write("table4raw_pt2_grb.csv", results_run, append=true)
+        CSV.write("table2_grb.csv", results_run, append=true)
 
     end
 end

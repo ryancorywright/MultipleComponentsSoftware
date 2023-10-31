@@ -100,7 +100,7 @@ violation_exact_UB_ws=sum(abs.(U_exact_ws'*U_exact_ws.-Diagonal(ones(r))))
 push!(results_run, [n, r, theK, UB_sdp_disj, run_sdp_disj, LB_gd_disj, violation_gd_disj, run_sdp_disj_UB, LB_gd_disj_UB, violation_gd_disj_UB, ofv_best, violation_best, runtime_deflation,
     ofv_exact, bound_exact, violation_exact, nodes_exact, run_exact, gap_exact, ofv_exact_UB, bound_exact_UB, violation_exact_UB, nodes_exact_UB, run_exact_UB, gap_exact_UB,
     ofv_exact_ws, bound_exact_ws, violation_exact_ws, nodes_exact_ws, run_exact_ws, gap_exact_ws, ofv_exact_UB_ws, bound_exact_UB_ws, violation_exact_UB_ws, nodes_exact_UB_ws, run_exact_UB_ws, gap_exact_UB_ws])
-CSV.write("tableec1_raw_v4.csv", results_run, append=true)
+CSV.write("tableec3_raw.csv", results_run, append=true)
 
 end
 end

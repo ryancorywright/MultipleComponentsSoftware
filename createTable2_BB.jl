@@ -60,7 +60,7 @@ for r=2:3
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Pitprops", n, r, theK, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table3raw_pt1.csv", results_run, append=true)
+        CSV.write("table2_bb.csv", results_run, append=true)
 
 
 
@@ -100,7 +100,7 @@ for r=2:3
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Wine", n, r, theK, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table3raw_pt1.csv", results_run, append=true)
+        CSV.write("table2_bb.csv", results_run, append=true)
 
     end
 end
@@ -121,7 +121,7 @@ for r=2:3
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Ionosphere", n, r, theK, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table3raw_pt1.csv", results_run, append=true)
+        CSV.write("table2_bb.csv", results_run, append=true)
 
     end
 end
@@ -144,7 +144,7 @@ for r=2:3
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["Geography", n, r, theK, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table3raw_pt1.csv", results_run, append=true)
+        CSV.write("table2_bb.csv", results_run, append=true)
 
     end
 end
@@ -164,7 +164,7 @@ for r=2:3
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["communities", n, r, theK, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table3raw_pt1.csv", results_run, append=true)
+        CSV.write("table2_bb.csv", results_run, append=true)
 
     end
 end
@@ -196,7 +196,7 @@ for r=2:3
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["arrhythmia", n, r, theK, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table3raw_pt1.csv", results_run, append=true)
+        CSV.write("table2_bb.csv", results_run, append=true)
 
     end
 end
@@ -217,7 +217,7 @@ for r=2:3
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["micromass", n, r, theK, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table3raw_pt1.csv", results_run, append=true)
+        CSV.write("table2_bb.csv", results_run, append=true)
 
     end
 end
@@ -240,7 +240,7 @@ for r=2:3
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["lung", n, r, theK, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table3raw_pt1.csv", results_run, append=true)
+        CSV.write("table2_bb.csv", results_run, append=true)
 
     end
 end
@@ -262,7 +262,7 @@ for r=2:3
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["gait", n, r, theK, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table3raw_pt1.csv", results_run, append=true)
+        CSV.write("table2_bb.csv", results_run, append=true)
 
     end
 end
@@ -282,7 +282,7 @@ for r=2:3
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["voice", n, r, theK, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table3raw_pt1.csv", results_run, append=true)
+        CSV.write("table2_bb.csv", results_run, append=true)
 
     end
 end
@@ -303,7 +303,7 @@ for r=2:3
 
         # Remark: only considering scenarios where we have an equal k for each PC, so that the columns line up
         push!(results_run, ["gastro", n, r, theK, ofv_best, violation_best, runtime_deflation])
-        CSV.write("table3raw_pt1.csv", results_run, append=true)
+        CSV.write("table2_bb.csv", results_run, append=true)
 
     end
 end
