@@ -34,6 +34,8 @@ At this point, the "createTablex.jl" and "createFigurex.jl" files should run suc
 ## Correspondence between script files and figures/tables in the paper
 - The file "createFigure3.jl" produces the output used to generate Figure 3, Table 3, and Figure EC.1 in our manuscript. 
 
+Note that you may need more RAM than is available on a standard laptop to reproduce the output for some of the largest datasets considered in the paper.
+
 ## Related Packages
 
 If you are interested in computing a single sparse PC, you may want to check out our related package https://github.com/ryancorywright/ScalableSPCA.jl which computes a single provably near-optimal sparse PC via branch-and-cut or relax-and-round techniques.
